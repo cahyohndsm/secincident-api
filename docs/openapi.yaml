@@ -1,0 +1,1078 @@
+openapi: 3.0.3
+info:
+  title: SecIncident API
+  version: 1.0.0
+  description: MVP REST API pelaporan & pelacakan insiden keamanan siber (UTS Pemrograman
+    Web Lanjut).
+servers:
+- url: http://localhost:5000
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: VALIDATION_ERROR
+            message:
+              type: string
+            details:
+              type: object
+paths:
+  /health:
+    get:
+      summary: Cek kesehatan layanan (tanpa API key)
+      tags:
+      - system
+      responses:
+        '200':
+          description: Berhasil
+  /api/v1/users:
+    post:
+      summary: Buat user
+      tags:
+      - users
+      responses:
+        '201':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              username: analyst3
+              email: analyst3@example.test
+              password: Password123!
+              role: analyst
+    get:
+      summary: Daftar user (filter role, q; sort; paginasi)
+      tags:
+      - users
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: role
+        in: query
+        schema:
+          type: string
+        example: analyst
+      - name: q
+        in: query
+        schema:
+          type: string
+        example: analyst
+      - name: sort
+        in: query
+        schema:
+          type: string
+        example: username
+      - name: page
+        in: query
+        schema:
+          type: string
+        example: '1'
+      - name: per_page
+        in: query
+        schema:
+          type: string
+        example: '10'
+  /api/v1/users/{id}:
+    get:
+      summary: Detail user
+      tags:
+      - users
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      summary: Ganti user (lengkap)
+      tags:
+      - users
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              username: analyst3
+              email: analyst3@example.test
+              password: Password123!
+              role: analyst
+    patch:
+      summary: Ubah sebagian user
+      tags:
+      - users
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              role: admin
+    delete:
+      summary: Hapus user (409 bila masih direferensikan)
+      tags:
+      - users
+      responses:
+        '204':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/categories:
+    post:
+      summary: Buat kategori insiden
+      tags:
+      - categories
+      responses:
+        '201':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: Insider Threat
+              description: Ancaman dari orang dalam
+              default_severity: high
+    get:
+      summary: Daftar kategori
+      tags:
+      - categories
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: sort
+        in: query
+        schema:
+          type: string
+        example: name
+  /api/v1/categories/{id}:
+    get:
+      summary: Detail kategori
+      tags:
+      - categories
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      summary: Ganti kategori
+      tags:
+      - categories
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: Insider Threat
+              description: Ancaman orang dalam
+              default_severity: high
+    patch:
+      summary: Ubah sebagian kategori
+      tags:
+      - categories
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              default_severity: critical
+    delete:
+      summary: Hapus kategori (409 bila dipakai insiden)
+      tags:
+      - categories
+      responses:
+        '204':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/assets:
+    post:
+      summary: Buat aset
+      tags:
+      - assets
+      responses:
+        '201':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: Server File Prodi
+              asset_type: server
+              ip_address: 10.0.0.30
+              criticality: high
+              owner_id: 1
+    get:
+      summary: Daftar aset (filter asset_type, criticality, owner_id, q)
+      tags:
+      - assets
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: asset_type
+        in: query
+        schema:
+          type: string
+        example: server
+      - name: criticality
+        in: query
+        schema:
+          type: string
+        example: high
+      - name: q
+        in: query
+        schema:
+          type: string
+        example: server
+      - name: sort
+        in: query
+        schema:
+          type: string
+        example: -criticality
+  /api/v1/assets/{id}:
+    get:
+      summary: Detail aset
+      tags:
+      - assets
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      summary: Ganti aset
+      tags:
+      - assets
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              name: Server File Prodi
+              asset_type: server
+              ip_address: 10.0.0.31
+              criticality: high
+              owner_id: 1
+    patch:
+      summary: Ubah sebagian aset
+      tags:
+      - assets
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              criticality: critical
+    delete:
+      summary: Hapus aset (409 bila tertaut insiden)
+      tags:
+      - assets
+      responses:
+        '204':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/incidents:
+    post:
+      summary: Laporkan insiden baru
+      tags:
+      - incidents
+      responses:
+        '201':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              title: Email phishing menyasar staf
+              description: Beberapa staf menerima email palsu meminta reset password.
+              severity: high
+              category_id: 1
+              reporter_id: 4
+              assignee_id: 2
+              asset_ids:
+              - 3
+    get:
+      summary: Daftar insiden (filter status, severity, category_id, assignee_id,
+        reporter_id, asset_id, q; sort; paginasi)
+      tags:
+      - incidents
+      responses:
+        '200':
+          description: Berhasil
+        '400':
+          description: Request/parameter tidak valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: status
+        in: query
+        schema:
+          type: string
+        example: open
+      - name: severity
+        in: query
+        schema:
+          type: string
+        example: high
+      - name: q
+        in: query
+        schema:
+          type: string
+        example: phishing
+      - name: sort
+        in: query
+        schema:
+          type: string
+        example: -detected_at
+      - name: page
+        in: query
+        schema:
+          type: string
+        example: '1'
+      - name: per_page
+        in: query
+        schema:
+          type: string
+        example: '10'
+  /api/v1/incidents/{id}:
+    get:
+      summary: Detail insiden beserta aset terdampak
+      tags:
+      - incidents
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+    put:
+      summary: Ganti insiden (lengkap)
+      tags:
+      - incidents
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              title: Email phishing menyasar staf
+              description: Beberapa staf menerima email palsu meminta reset password.
+              severity: high
+              category_id: 1
+              reporter_id: 4
+              assignee_id: 2
+    patch:
+      summary: Ubah sebagian insiden
+      tags:
+      - incidents
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              severity: critical
+    delete:
+      summary: Hapus insiden
+      tags:
+      - incidents
+      responses:
+        '204':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/incidents/{id}/status:
+    patch:
+      summary: Ubah status (workflow tervalidasi)
+      tags:
+      - incidents
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              status: investigating
+  /api/v1/incidents/{id}/assets:
+    post:
+      summary: Tautkan aset terdampak
+      tags:
+      - incidents
+      responses:
+        '201':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Konflik (duplikat/referensi/transisi tidak valid)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          description: Validasi input gagal
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            example:
+              asset_id: 2
+              impact_note: Server diisolasi
+  /api/v1/incidents/{id}/assets/{asset_id}:
+    delete:
+      summary: Lepas tautan aset
+      tags:
+      - incidents
+      responses:
+        '204':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Data tidak ditemukan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+      - name: asset_id
+        in: path
+        required: true
+        schema:
+          type: integer
+  /api/v1/audit-logs:
+    get:
+      summary: Daftar audit log (read-only; filter entity, action, user_id, entity_id)
+      tags:
+      - audit-logs
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []
+      parameters:
+      - name: entity
+        in: query
+        schema:
+          type: string
+        example: incident
+      - name: action
+        in: query
+        schema:
+          type: string
+        example: STATUS_CHANGE
+      - name: sort
+        in: query
+        schema:
+          type: string
+        example: -id
+  /api/v1/stats/summary:
+    get:
+      summary: Ringkasan jumlah insiden per severity dan status
+      tags:
+      - stats
+      responses:
+        '200':
+          description: Berhasil
+        '401':
+          description: API key salah/tidak ada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+      security:
+      - ApiKeyAuth: []

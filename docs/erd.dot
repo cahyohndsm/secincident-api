@@ -1,0 +1,66 @@
+digraph ERD {
+  rankdir=LR; fontname="Helvetica"; nodesep=0.5; ranksep=0.9;
+  node [shape=plaintext, fontname="Helvetica", fontsize=10];
+  edge [fontname="Helvetica", fontsize=9, arrowhead=crow, arrowtail=tee, dir=both];
+
+  users [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#1f4e79"><FONT COLOR="white"><B>users</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT">username : VARCHAR(50) UNIQUE</TD></TR>
+    <TR><TD ALIGN="LEFT">email : VARCHAR(120) UNIQUE</TD></TR>
+    <TR><TD ALIGN="LEFT">password_hash : VARCHAR(255)</TD></TR>
+    <TR><TD ALIGN="LEFT">role : VARCHAR(20)</TD></TR>
+    <TR><TD ALIGN="LEFT">created_at : DATETIME</TD></TR></TABLE>>];
+
+  incident_categories [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#1f4e79"><FONT COLOR="white"><B>incident_categories</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT">name : VARCHAR(80) UNIQUE</TD></TR>
+    <TR><TD ALIGN="LEFT">description : VARCHAR(255)</TD></TR>
+    <TR><TD ALIGN="LEFT">default_severity : VARCHAR(10)</TD></TR></TABLE>>];
+
+  assets [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#1f4e79"><FONT COLOR="white"><B>assets</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT">name : VARCHAR(100)</TD></TR>
+    <TR><TD ALIGN="LEFT">asset_type : VARCHAR(20)</TD></TR>
+    <TR><TD ALIGN="LEFT">ip_address : VARCHAR(45)</TD></TR>
+    <TR><TD ALIGN="LEFT">criticality : VARCHAR(10)</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> owner_id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT">created_at : DATETIME</TD></TR></TABLE>>];
+
+  incidents [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#9c2a2a"><FONT COLOR="white"><B>incidents</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT">title : VARCHAR(150)</TD></TR>
+    <TR><TD ALIGN="LEFT">description : TEXT</TD></TR>
+    <TR><TD ALIGN="LEFT">severity : VARCHAR(10)</TD></TR>
+    <TR><TD ALIGN="LEFT">status : VARCHAR(15)</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> category_id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> reporter_id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> assignee_id : INTEGER NULL</TD></TR>
+    <TR><TD ALIGN="LEFT">detected_at, resolved_at</TD></TR>
+    <TR><TD ALIGN="LEFT">created_at, updated_at</TD></TR></TABLE>>];
+
+  incident_assets [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#1f4e79"><FONT COLOR="white"><B>incident_assets</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK, FK</B> incident_id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK, FK</B> asset_id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT">impact_note : VARCHAR(255)</TD></TR></TABLE>>];
+
+  audit_logs [label=<<TABLE BORDER="0" CELLBORDER="1" CELLSPACING="0" CELLPADDING="4">
+    <TR><TD BGCOLOR="#1f4e79"><FONT COLOR="white"><B>audit_logs</B></FONT></TD></TR>
+    <TR><TD ALIGN="LEFT"><B>PK</B> id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT"><B>FK</B> user_id : INTEGER NULL</TD></TR>
+    <TR><TD ALIGN="LEFT">action, entity : VARCHAR</TD></TR>
+    <TR><TD ALIGN="LEFT">entity_id : INTEGER</TD></TR>
+    <TR><TD ALIGN="LEFT">detail : VARCHAR(255)</TD></TR>
+    <TR><TD ALIGN="LEFT">created_at : DATETIME</TD></TR></TABLE>>];
+
+  users -> assets [label="memiliki (1:N)"];
+  users -> incidents [label="melaporkan / ditugaskan (1:N)"];
+  users -> audit_logs [label="aktor (1:N)"];
+  incident_categories -> incidents [label="mengelompokkan (1:N)"];
+  incidents -> incident_assets [label="1:N"];
+  assets -> incident_assets [label="1:N"];
+}
