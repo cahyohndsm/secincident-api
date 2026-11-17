@@ -34,6 +34,16 @@ def create_app(config_class=Config):
     def health():
         return jsonify({"status": "ok", "service": "secincident-api", "version": "1.0.0"})
 
+    @app.get("/")
+    def index():
+        return jsonify({
+            "service": "secincident-api",
+            "version": "1.0.0",
+            "description": "REST API pelaporan insiden keamanan siber (UTS TK070)",
+            "health": "/health",
+            "auth": "Semua endpoint /api/v1/* memerlukan header X-API-Key",
+        })
+
     @app.after_request
     def security_headers(resp):
         resp.headers["X-Content-Type-Options"] = "nosniff"
