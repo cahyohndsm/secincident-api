@@ -164,6 +164,6 @@ Lihat [`docs/RENCANA_UAS.md`](docs/RENCANA_UAS.md).
 
 ## Lisensi / Tautan
 
-- Repository: `<ISI URL GITHUB>`
+- Repository: `https://github.com/cahyohndsm/secincident-api`
 - Demo: `https://rizkicahya.pythonanywhere.com`
 - Release: `v1.0`
